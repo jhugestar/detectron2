@@ -108,7 +108,7 @@ class InferenceAction(Action):
             file_list = [input_spec]
         else:
             file_list = glob.glob(input_spec)
-        return file_list
+        return sorted(file_list)
 
 
 @register_action
@@ -294,6 +294,14 @@ def main():
     logger.setLevel(verbosity_to_level(verbosity))
     args.func(args)
 
+def caller(params):
+    parser = create_argument_parser()
+    args = parser.parse_args(params)
+    verbosity = args.verbosity if hasattr(args, "verbosity") else None
+    global logger
+    logger = setup_logger(name=LOGGER_NAME)
+    logger.setLevel(verbosity_to_level(verbosity))
+    args.func(args)
 
 if __name__ == "__main__":
     main()
