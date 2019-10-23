@@ -1,17 +1,23 @@
-import numpy as np
+from apply_net import denseposeRunner
 
 import sys
 
 import glob
 import os
 
-#Optional. To visualize data
-import cv2
-
 # mocapRootDir = '/run/media/hjoo/disk/data/Penn_Action/labels'
-inputDir_root = '/run/media/hjoo/disk/data/3dpw/imageFiles'
-img_outputDir_root = '/run/media/hjoo/disk/data/3dpw/densepose_img'
-json_outputDir_root = '/run/media/hjoo/disk/data/3dpw/densepose'
+g_bIsDevfair = False
+if os.path.exists('/private/home/hjoo'):
+    g_bIsDevfair = True
+
+if g_bIsDevfair:
+    inputDir_root = '/private/home/hjoo/data/3dpw/imageFiles'
+    img_outputDir_root = '/private/home/hjoo/data/3dpw/densepose_img'
+    json_outputDir_root = '/private/home/hjoo/data/3dpw/densepose'
+else:
+    inputDir_root = '/run/media/hjoo/disk/data/3dpw/imageFiles'
+    img_outputDir_root = '/run/media/hjoo/disk/data/3dpw/densepose_img'
+    json_outputDir_root = '/run/media/hjoo/disk/data/3dpw/densepose'
 
 
 if not os.path.exists(img_outputDir_root):
@@ -36,13 +42,21 @@ for i, inputPath in enumerate(seqList):
     #   continue
 
     outputFolder_img = os.path.join(img_outputDir_root,seqName)
-    outputFolder_pkl = os.path.join(json_outputDir_root,seqName)
+    outputFolder_pkl = os.path.join(json_outputDir_root,seqName+'.pkl')  
+
+
+    if not os.path.exists(outputFolder_pkl):
+        params = ['dump','configs/densepose_rcnn_R_50_FPN_s1x.yaml','model_final_5f3d7f.pkl','{}/*.jpg'.format(inputPath),'--output',outputFolder_pkl,'-v']
+        denseposeRunner(params)
+
 
     if not os.path.exists(outputFolder_img):
         os.mkdir(outputFolder_img)
+        params = ['show','configs/densepose_rcnn_R_50_FPN_s1x.yaml','model_final_5f3d7f.pkl','{}/*.jpg'.format(inputPath),'dp_contour,bbox','--output','{}/output.jpg'.format(outputFolder_img),'-v']
+        denseposeRunner(params)
 
-    # if not os.path.exists(outputFolder_json):
-    #     os.mkdir(outputFolder_json)
+    break
+
 
     # cmd_str = "cd /home/hjoo/codes/openpose; ./build/examples/openpose/openpose.bin --image_dir {0} --write_images {1} --write_images_format jpg --write_json {2}".format(inputPath,
     #                                                                                                                                                 outputFolder_img, outputFolder_json)
@@ -52,12 +66,5 @@ for i, inputPath in enumerate(seqList):
     # os.system(cmd_str)
     #./build/examples/openpose/openpose.bin --image_dir $inputFolder --write_images ${outputFolder}_img --write_images_format jpg --write_json $outputFolder
 
-    from apply_net import caller
-    
-    params = ['dump','configs/densepose_rcnn_R_50_FPN_s1x.yaml','model_final_5f3d7f.pkl','{}/*.jpg'.format(inputPath),'--output','{}.pkl'.format(outputFolder_pkl),'-v']
-    caller(params)
-
-    params = ['show','configs/densepose_rcnn_R_50_FPN_s1x.yaml','model_final_5f3d7f.pkl','{}/*.jpg'.format(inputPath),'dp_contour,bbox','--output','{}/output.jpg'.format(outputFolder_img),'-v']
-    caller(params)
 
 

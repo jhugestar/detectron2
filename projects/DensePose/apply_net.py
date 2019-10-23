@@ -294,7 +294,7 @@ def main():
     logger.setLevel(verbosity_to_level(verbosity))
     args.func(args)
 
-def caller(params):
+def denseposeRunner(params):
     parser = create_argument_parser()
     args = parser.parse_args(params)
     verbosity = args.verbosity if hasattr(args, "verbosity") else None
